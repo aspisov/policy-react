@@ -1,0 +1,3 @@
+  0%|                                                                       | 0/500 [00:00<?, ?it/s]/Users/dimaaspisov/Library/Caches/pypoetry/virtualenvs/policyreact-qzxHfL7o-py3.13/lib/python3.13/site-packages/torch/utils/data/dataloader.py:683: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+`generation_config` default values have been modified to match model-specific defaults: {'top_k': 20, 'top_p': 0.95, 'bos_token_id': 151643}. If this is not desired, please set these values explicitly.

@@ -1,0 +1,7 @@
+{"time":"2025-05-05T23:06:46.617135+03:00","level":"INFO","msg":"stream: starting","core version":"0.19.10","symlink path":"/Users/dimaaspisov/Documents/research/policyreact/src/wandb/run-20250505_230646-4yr70iv9/logs/debug-core.log"}
+{"time":"2025-05-05T23:06:47.140103+03:00","level":"INFO","msg":"created new stream","id":"4yr70iv9"}
+{"time":"2025-05-05T23:06:47.140183+03:00","level":"INFO","msg":"stream: started","id":"4yr70iv9"}
+{"time":"2025-05-05T23:06:47.140221+03:00","level":"INFO","msg":"handler: started","stream_id":"4yr70iv9"}
+{"time":"2025-05-05T23:06:47.140261+03:00","level":"INFO","msg":"sender: started","stream_id":"4yr70iv9"}
+{"time":"2025-05-05T23:06:47.1403+03:00","level":"INFO","msg":"writer: Do: started","stream_id":"4yr70iv9"}
+{"time":"2025-05-05T23:06:47.536201+03:00","level":"INFO","msg":"Starting system monitor"}

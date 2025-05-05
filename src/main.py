@@ -3,9 +3,9 @@ from peft import LoraConfig
 from transformers.utils.quantization_config import BitsAndBytesConfig
 from trl import GRPOConfig, GRPOTrainer
 
-from src.dataset import RESEARCH_SYSTEM_PROMPT, load_and_preprocess_musique
-from src.model import load_model_and_tokenizer
-from src.rewards import research_reward_func
+from dataset import RESEARCH_SYSTEM_PROMPT, load_and_preprocess_musique
+from model import load_model_and_tokenizer
+from rewards import research_reward_func
 
 
 def main():
@@ -25,11 +25,19 @@ def main():
     bnb_config = None
 
     # PEFT Configuration (optional, for LoRA)
-    # See ReSearch paper Appendix B or TRL examples for target_modules
+    # See ReSearch paper Appendix B or TRL examples for target_modules - Adjust for Qwen if needed
     peft_config = LoraConfig(
         r=16,
         lora_alpha=32,  # Often 2*r
-        # target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "up_proj", "down_proj", "gate_proj"], # Adjust for Qwen
+        target_modules=[
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "up_proj",
+            "down_proj",
+            "gate_proj",
+        ],  # Common targets
         task_type="CAUSAL_LM",
         lora_dropout=0.05,
         # modules_to_save=["embed_tokens", "lm_head"], # If training non-LoRA parts
@@ -48,11 +56,15 @@ def main():
         # warmup_ratio=0.1,
         # lr_scheduler_type='cosine',
         logging_steps=10,
-        bf16=torch.cuda.is_bf16_supported(),  # Use bf16 if available
-        fp16=not torch.cuda.is_bf16_supported(),  # Use fp16 otherwise
+        # Only enable fp16/bf16 if a CUDA GPU is available
+        bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
+        fp16=torch.cuda.is_available()
+        and not (torch.cuda.is_available() and torch.cuda.is_bf16_supported()),
         per_device_train_batch_size=1,  # Adjust based on GPU memory
-        gradient_accumulation_steps=16,  # Adjust based on GPU memory (effective batch size = batch_size * grad_accum * num_gpus)
-        num_generations=1,  # Number of rollouts per prompt in GRPO (ReSearch used 5)
+        # Increase gradient_accumulation_steps so effective batch size (1*20=20) is divisible by num_generations (5)
+        gradient_accumulation_steps=20,  # Adjust based on GPU memory (effective batch size = batch_size * grad_accum * num_gpus)
+        # Set num_generations >= 2 for GRPO advantage calculation (ReSearch used 5)
+        num_generations=5,  # Number of rollouts per prompt in GRPO
         max_prompt_length=512,  # Adjust based on typical MuSiQue prompt length
         max_completion_length=1024,  # Max length of the generated rollout (<think>...</answer>)
         num_train_epochs=2,  # From ReSearch paper Appendix B
@@ -84,14 +96,12 @@ def main():
     print("Initializing GRPOTrainer...")
     trainer = GRPOTrainer(
         model=model,
-        # tokenizer=tokenizer,
         args=grpo_config,
         train_dataset=train_dataset,
-        # eval_dataset=val_dataset, # Optional
         reward_funcs=[
             research_reward_func
         ],  # Corrected parameter name and made it a list
-        # peft_config=peft_config, # Pass PEFT config if using LoRA
+        peft_config=peft_config,  # Pass PEFT config if using LoRA
         # system_prompt=RESEARCH_SYSTEM_PROMPT, # Alternative way to set system prompt if needed
         # TODO: Implement custom rollout for search interaction later
     )
